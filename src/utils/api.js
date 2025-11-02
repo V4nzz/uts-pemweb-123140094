@@ -46,66 +46,25 @@ function applyFilters(articles, { keyword = "", from = "", to = "", category = "
     return out;
   }  
 
-export async function fetchArticles(params = {}) {
-  const {
-    page = 1,
-    pageSize = 12,
-    keyword = "",
-    category = "",
-    from = "",
-    to = ""
-  } = params;
-
-  // 1) Coba STATIC lebih dulu jika VITE_USE_MOCK=true atau belum pernah dicek
-  if (ENV_USE_MOCK || STATIC_AVAILABLE !== false) {
-    try {
-      const payload = await loadStaticOnce(); // { status, totalResults, articles }
-      STATIC_AVAILABLE = true;
-      const filtered = applyFilters(payload.articles || [], { keyword, from, to, category });
-      const total = filtered.length;
-      const start = (page - 1) * pageSize;
-      const end = start + pageSize;
-      return { articles: filtered.slice(start, end), total };
-    } catch (e) {
-      // Jika file tidak ada, tandai tidak tersedia dan lanjut ke live
-      if (String(e.message || "").startsWith("STATIC_NOT_FOUND")) {
-        STATIC_AVAILABLE = false;
-      } else {
-        // error baca file statis selain 404 → teruskan
-        throw e;
-      }
+// src/utils/api.js
+export async function fetchArticles({ keyword, category, from, to, page, pageSize }) {
+    const params = new URLSearchParams();
+    if (keyword) params.set("q", keyword);
+    if (category) params.set("category", category);
+    if (from) params.set("from", from);
+    if (to) params.set("to", to);
+    if (page) params.set("page", page);
+    if (pageSize) params.set("pageSize", pageSize);
+  
+    const r = await fetch(`/api/news?${params.toString()}`);
+    if (!r.ok) {
+      let errText = "";
+      try { errText = await r.text(); } catch {}
+      throw new Error(`NewsAPI HTTP ${r.status} – ${errText || r.statusText}`);
     }
-  }
-
-  // 2) Fallback LIVE (gunakan header, bukan query apikey)
-  const key = import.meta.env?.VITE_NEWS_API_KEY;
-  if (!key) {
-    // Beri pesan yang jelas di UI agar tidak terlihat "401" misterius
-    throw new Error(
-      "NewsAPI LIVE mode membutuhkan VITE_NEWS_API_KEY di .env atau aktifkan VITE_USE_MOCK=true"
-    );
-  }
-
-  const url = new URL("https://newsapi.org/v2/top-headlines");
-  // Sesuaikan negara default
-  url.searchParams.set("country", import.meta.env?.VITE_NEWS_COUNTRY || "id");
-  if (category) url.searchParams.set("category", category);
-  if (keyword) url.searchParams.set("q", keyword);
-  url.searchParams.set("page", String(page));
-  url.searchParams.set("pageSize", String(pageSize));
-
-  const res = await fetch(url, { headers: { "X-Api-Key": key } });
-
-  if (!res.ok) {
-    // Tampilkan pesan error aslinya agar mudah diagnosa
-    let detail = "";
-    try { detail = await res.text(); } catch {}
-    throw new Error(`NewsAPI HTTP ${res.status}${detail ? ` – ${detail}` : ""}`);
-  }
-
-  const data = await res.json();
-  return {
-    articles: data.articles ?? [],
-    total: data.totalResults ?? 0
-  };
-}
+    const json = await r.json();
+    return {
+      total: json.totalResults || 0,
+      articles: json.articles || [],
+    };
+  }  
