@@ -58,7 +58,7 @@ Jika Anda ingin mencoba aplikasi ini secara lokal (di `localhost`), pastikan And
 
 Proyek ini sudah saya deploy agar bisa diakses secara publik:
 
-**Link Deployment:** 
+**Link Deployment:** https://uts-pemweb-123140094.vercel.app/
 
 ---
 
@@ -67,7 +67,8 @@ Proyek ini sudah saya deploy agar bisa diakses secara publik:
 Berikut adalah beberapa screenshot yang menunjukkan tampilan News Portal ini.
 
 **- Tampilan Navigation Bar News Portal**
+<img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/8f6191f5-d304-4800-857b-a8b933c283ba" />
+
 
 **- Tampilan Pencarian dan Filter Tanggal**
-
-**- Tampilan Pagination**
+<img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/c3195fe1-fafc-428c-abcf-a44547529207" />
