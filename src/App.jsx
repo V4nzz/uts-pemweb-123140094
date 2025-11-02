@@ -1,53 +1,68 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Header from "./components/Header";
 import SearchForm from "./components/SearchForm";
 import DataTable from "./components/DataTable";
 import { fetchArticles } from "./utils/api";
 import "./App.css";
+import LoadingSkeleton from "./components/LoadingSkeleton";
+import ErrorBanner from "./components/ErrorBanner";
+import LoadMoreSentinel from "./components/LoadMoreSentinel";
 
 export default function App() {
-  const [category, setCategory] = useState("technology");
-  const [keyword, setKeyword]   = useState("");
+  // kosongkan kategori default supaya tidak menghabisi hasil dari cache "everything"
+  const [category, setCategory] = useState("");
+  const [keyword, setKeyword] = useState("");
 
-  // ⬇️ state baru langkah 6
-  const [from, setFrom]         = useState("");
-  const [to, setTo]             = useState("");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
   const [pageSize, setPageSize] = useState(12);
-  const [page, setPage]         = useState(1);
-  const [total, setTotal]       = useState(0);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
 
   const [articles, setArticles] = useState([]);
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  // ⬇️ ubah: load menerima param pagination & filter
+  const handleLoadMore = useCallback(() => setPage((p) => p + 1), []);
+
   async function load(reset = false) {
-    setLoading(true); setError("");
+    setLoading(true);
+    setError("");
     try {
-      const data = await fetchArticles({ q: keyword, category, from, to, page, pageSize });
-      setTotal(data.totalResults || 0);
-      setArticles(prev => (reset ? data.articles : [...prev, ...data.articles]));
+      const data = await fetchArticles({ keyword, category, from, to, page, pageSize });
+      setTotal(data.total || 0);
+      setArticles((prev) => (reset ? data.articles : [...prev, ...data.articles]));
     } catch (e) {
-      setError(e.message);
+      setError(e.message || String(e));
     } finally {
       setLoading(false);
     }
   }
 
-  // ketika kategori berubah → reset page & muat baru
-  useEffect(() => { setPage(1); load(true); /* eslint-disable-next-line */ }, [category]);
+  // Reset nomor halaman saat filter berubah (keyword, tanggal, size, kategori)
+  useEffect(() => {
+    setPage(1);
+  }, [keyword, from, to, pageSize, category]);
 
-  // pagination: saat page bertambah, ambil halaman berikutnya
-  useEffect(() => { if (page > 1) load(false); /* eslint-disable-next-line */ }, [page]);
+  // Muat ulang data ketika filter berubah (pakai nilai state terbaru)
+  useEffect(() => {
+    load(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [keyword, from, to, pageSize, category]);
 
-  // submit dari SearchForm
+  // Pagination: ketika page bertambah, ambil halaman berikutnya
+  useEffect(() => {
+    if (page > 1) load(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
+
+  // Submit dari SearchForm
   function handleSearch({ q, from, to, size }) {
     setKeyword(q);
     setFrom(from);
     setTo(to);
     setPageSize(size);
-    setPage(1);
-    load(true);
+    // tidak memanggil load() di sini; biarkan useEffect yang menangani
   }
 
   const hasMore = articles.length < total;
@@ -55,22 +70,31 @@ export default function App() {
   return (
     <div className="container">
       <Header active={category} onChange={setCategory} />
+
       <SearchForm
         defaultQ={keyword}
         defaults={{ from, to, size: pageSize }}
         onSubmit={handleSearch}
       />
 
-      {error && <div style={{ color: "crimson" }}>Error: {error}</div>}
-      {loading && articles.length === 0 && <p>Memuat berita…</p>}
+      <ErrorBanner message={error} onRetry={() => { setPage(1); load(true); }} />
 
-      {!loading && <DataTable articles={articles} />}
+      {loading && articles.length === 0 ? (
+        <LoadingSkeleton />
+      ) : (
+        <DataTable articles={articles} />
+      )}
 
-      {/* tombol Load More */}
       {!loading && hasMore && (
         <p style={{ textAlign: "center" }}>
-          <button className="tab" onClick={() => setPage((p) => p + 1)}>Load More</button>
+          <button className="tab" disabled={loading || !hasMore} onClick={handleLoadMore}>
+            {loading ? "Loading..." : "Load More"}
+          </button>
         </p>
+      )}
+
+      {!loading && hasMore && (
+        <LoadMoreSentinel disabled={!hasMore} onLoadMore={handleLoadMore} />
       )}
     </div>
   );

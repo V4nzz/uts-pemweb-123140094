@@ -4,17 +4,23 @@ const TABS = [
     { key: 'sports', label: 'Sports' },
   ];
   
-  export default function Header({ active, onChange }) {
+  export default function Header({ active = "", onChange }) {
+    const tabs = [
+      { key: "", label: "All" },
+      { key: "technology", label: "Technology" },
+      { key: "business", label: "Business" },
+      { key: "sports", label: "Sports" },
+    ];
+  
     return (
-      <header className="site-header">
-        <h1 className="brand">News Portal</h1>
-        <nav className="navbar" aria-label="Kategori berita">
-          {TABS.map(t => (
+      <header className="header">
+        <h1>News Portal</h1>
+        <nav className="navbar">
+          {tabs.map((t) => (
             <button
               key={t.key}
-              className={`tab ${active === t.key ? 'active' : ''}`}
+              className={`nav-item ${active === t.key ? "active" : ""}`}
               onClick={() => onChange(t.key)}
-              aria-pressed={active === t.key}
             >
               {t.label}
             </button>
@@ -22,4 +28,4 @@ const TABS = [
         </nav>
       </header>
     );
-  }
+  }          
