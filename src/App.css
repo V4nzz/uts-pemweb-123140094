@@ -6,3 +6,7 @@ body { margin: 0; font-family: system-ui, sans-serif; }
 .navbar{display: flex; gap: 5rem; flex-wrap: wrap;}
 .tab{padding: .45rem .8rem; border-radius: 999px; border: 1px solid #ccc; background: #fff; cursor: pointer;}
 .tab.active{background: #eef;}
+
+.search{display:flex;gap:.5rem;margin:1rem 0}
+.search input{padding:.5rem .6rem}
+.search button{padding:.5rem .8rem}
