@@ -1,0 +1,33 @@
+{
+    "status": "ok",
+    "articles": [
+      {
+        "title": "AI chip terbaru",
+        "description": "Rilis chip baru untuk akselerasi AI.",
+        "url": "https://example.com/ai-chip",
+        "urlToImage": "",
+        "source": { "name": "Tech Demo" },
+        "publishedAt": "2025-11-01T10:00:00Z",
+        "__category": "technology"
+      },
+      {
+        "title": "Pasar saham menguat",
+        "description": "Indeks bisnis menguat jelang akhir pekan.",
+        "url": "https://example.com/market",
+        "urlToImage": "",
+        "source": { "name": "Biz Demo" },
+        "publishedAt": "2025-10-30T09:30:00Z",
+        "__category": "business"
+      },
+      {
+        "title": "Derby panas berakhir imbang",
+        "description": "Laga besar berakhir 2-2.",
+        "url": "https://example.com/derby",
+        "urlToImage": "",
+        "source": { "name": "Sports Demo" },
+        "publishedAt": "2025-10-29T19:00:00Z",
+        "__category": "sports"
+      }
+    ]
+  }
+  
