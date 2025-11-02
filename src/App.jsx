@@ -1,8 +1,14 @@
-export default function App() {
+import { useState } from "react";
+import Header from "./components/Header";
+import "./App.css";
+
+export default function App () {
+  const [category, setCategory] = useState("technology");
+
   return (
     <div className="container">
-      <h1>News Portal</h1>
-      <p>Setup awal aplikasi.</p>
+      <Header active={category} onChange={setCategory} />
+      <p>Kategori aktif: <b>{category}</b></p>
     </div>
   );
 }
